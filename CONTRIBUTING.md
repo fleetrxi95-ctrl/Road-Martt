@@ -1,88 +1,106 @@
 # Contributing to Road-Martt
 
-Welcome to **Road-Martt**. This guide is the starting point for contributors joining the project while it is still at its initial repository stage. It explains how to obtain a local copy, what is currently in the repository, and how to make the first changes without assuming a technology stack that has not yet been added.
+**Road-Martt** is the Shopify-powered dropshipping storefront in the broader Fleet Rx portfolio. Keep storefront commerce concerns—catalog presentation, customer journeys, and Shopify-backed operations—separate from the Fleet Rx marketing and private operations platform. This guide gives every contributor one secure, repeatable way to access the repository, create changes, and propose them for review.
 
-> **Current project status:** The repository currently contains its project title in [`README.md`](README.md), but no application source directories, dependency manifest, build configuration, or automated test configuration. Consequently, there are no project-specific install, run, lint, build, or test commands yet. This guide will need a short update when the first implementation is introduced.
+> **Principle:** Never commit account credentials, API tokens, customer data, private order data, or production configuration. Use GitHub authentication for repository access and approved secret storage for application credentials.[1]
 
-## Setup
+## Local Setup and Git Credentials
 
-Contributors need a GitHub account and Git installed locally. If you have write access, clone the central repository. If you do not have write access, create a fork first and clone your fork; GitHub documents both cloning and fork-based collaboration workflows.[1][2]
+Use GitHub CLI with the system credential helper whenever possible. This avoids placing a personal access token in a repository URL, shell history, or tracked configuration. GitHub documents the browser-based login flow and its credential-helper integration for Git operations.[2] [3]
 
-| Scenario | Recommended command | What it does |
+| Task | Command | Expected result |
 |---|---|---|
-| You have repository write access | `gh repo clone fleetrxi95-ctrl/Road-Martt` | Creates a local clone of the central repository. |
-| You do not have write access | `gh repo fork fleetrxi95-ctrl/Road-Martt --clone` | Creates a personal fork and clones it locally. |
-| You already cloned the repository | `cd Road-Martt` | Moves into the local project directory. |
+| Authenticate securely | `gh auth login` | Follow the prompts, select GitHub.com, HTTPS, and browser authentication. |
+| Confirm the active account | `gh auth status` | Verify that the expected GitHub account is active. |
+| Configure Git to use the GitHub credential helper | `gh auth setup-git` | Git can authenticate to GitHub without embedding a token in `origin`. |
+| Identify your commits | `git config --global user.name "Your Name"`<br>`git config --global user.email "you@example.com"` | Commits use your recognizable author identity. |
+| Clone Road-Martt | `gh repo clone fleetrxi95-ctrl/Road-Martt` | Creates a local project directory with `origin` set to the repository. |
 
-After cloning, create a short-lived branch for one focused change. A descriptive name such as `docs/improve-onboarding` or `feat/add-homepage` makes the work easy to review.
+After cloning, enter the repository and verify that the remote uses an ordinary HTTPS URL. A remote URL should identify the repository, not contain a password or token.
 
 ```bash
-git switch -c docs/improve-onboarding
-```
-
-At this stage, no dependency installation is required because the repository does not yet include a package manager manifest or application code. When the project gains a stack, the maintainer should add the exact prerequisites and commands to this section—for example, the required runtime version plus the commands to install dependencies, start development, run checks, and execute tests.
-
-## Project Structure
-
-The repository is intentionally minimal. The table below describes the current structure rather than a future target architecture.
-
-| Path | Purpose | Contributor guidance |
-|---|---|---|
-| [`README.md`](README.md) | The project’s top-level introduction. It currently identifies the project as **Road-Martt**. | Keep it concise and update it when a product description, development commands, or deployment information become available. |
-| `CONTRIBUTING.md` | Contributor onboarding and workflow guidance. | Update this file whenever setup steps, tooling, or collaboration conventions change. |
-| `.git/` | Local Git metadata created during cloning. It is not committed to GitHub. | Do not edit Git internals directly. Use normal Git commands to manage branches, commits, and remotes. |
-
-No `src/`, `app/`, `tests/`, `package.json`, lockfile, container configuration, or continuous-integration workflow exists yet. Contributors should not invent setup commands based on another project; instead, agree on the intended stack in an issue or pull request before adding foundational configuration.
-
-## Key Files and What to Update First
-
-For the project’s first functional contribution, the primary work will likely be to introduce the application structure and the files required by the selected technology. The accompanying documentation should be updated in the same pull request so the next contributor can reproduce the environment.
-
-| If you add… | Also document or create… |
-|---|---|
-| A web or application framework | The runtime version, installation command, local development command, and production build command in [`README.md`](README.md). |
-| Dependencies | The appropriate manifest and lockfile, such as `package.json` and a package-manager lockfile. |
-| Tests or quality checks | The test/lint commands and a `tests/` or equivalent directory convention. |
-| Deployment or CI | A workflow under `.github/workflows/` and a short explanation of its triggers and required secrets. |
-| Environment-specific settings | A committed `.env.example` containing variable names and safe placeholder values; never commit real credentials. |
-
-## Contribution Workflow
-
-A small, reviewable pull request is preferable to a broad, mixed change. Before you begin, review open issues and pull requests to avoid duplicating work. Then work on a dedicated branch, commit a coherent change, and open a pull request against the repository’s default branch. GitHub pull requests provide the review and merge record for proposed changes.[3]
-
-```bash
-# Check the working tree and current branch
+cd Road-Martt
+git remote -v
 git status
-
-# Stage and commit a focused change
-git add <file-or-directory>
-git commit -m "docs: improve contributor onboarding"
-
-# Publish the branch and open a pull request
-git push -u origin docs/improve-onboarding
-gh pr create --fill
 ```
 
-Write commit messages in the imperative mood and keep each commit limited to one logical purpose. In the pull request description, explain what changed, why it is needed, how you checked the change, and any follow-up work. If the change affects setup or architecture, update this guide and the README in the same pull request.
+If your organization requires a personal access token instead of browser sign-in, create a fine-grained token limited to the required repository and permissions, store it in GitHub CLI or a credential manager, and never paste it into a file or command that will be committed.[4]
 
-## Definition of Ready for New Application Code
+## Working Safely
 
-Before contributors rely on a shared development environment, the first implementation pull request should establish the following baseline. This is a project recommendation, not a statement that these files already exist.
+Begin each change from an up-to-date default branch. Use one short-lived branch for one coherent outcome, whether that outcome is documentation, a storefront component, a Shopify integration adjustment, or a test. Fork the repository when you do not have write access; GitHub’s fork workflow is the preferred collaboration path for external contributors.[5]
 
-| Baseline item | Why it matters |
+```bash
+git switch main
+git pull --ff-only origin main
+git switch -c docs/improve-storefront-setup
+```
+
+Before editing, check the repository’s current README, open issues, and existing pull requests. When the project adds a framework or storefront implementation, use the documented install, lint, build, and test commands rather than inferring commands from another project.
+
+## Commit Conventions
+
+Write focused commits in the imperative mood. Each commit should answer one question: **what change is being made?** Use the following lightweight Conventional Commit pattern to keep history searchable and release notes understandable.
+
+```text
+<type>: <concise action>
+```
+
+| Type | Use it for | Example |
+|---|---|---|
+| `feat` | A new customer-facing or contributor-facing capability | `feat: add Road-Martt collection navigation` |
+| `fix` | A defect correction | `fix: preserve cart quantity after refresh` |
+| `docs` | README, onboarding, or architectural documentation | `docs: add Road-Martt contributor guide` |
+| `style` | Visual or formatting changes with no behavior change | `style: align mobile product cards` |
+| `refactor` | Internal restructuring without changing behavior | `refactor: isolate storefront data adapter` |
+| `test` | Added or adjusted automated coverage | `test: cover cart total formatting` |
+| `chore` | Tooling, housekeeping, or dependency maintenance | `chore: update local development instructions` |
+
+Keep the summary under roughly 72 characters, avoid ending it with a period, and include a body when reviewers need to understand a trade-off, data migration, Shopify behavior, or follow-up task. Before committing, inspect both the staged content and the local diff.
+
+```bash
+git status
+git diff
+git add <file-or-directory>
+git diff --staged
+git commit -m "docs: add Road-Martt contributor guide"
+```
+
+## Pull Request Workflow
+
+Publish the branch, then open a pull request against `main`. Pull requests create the shared review record for a proposed change and allow maintainers to discuss, approve, and merge it safely.[6]
+
+```bash
+git push -u origin docs/improve-storefront-setup
+gh pr create --base main --fill
+```
+
+A strong pull request is easy to evaluate because it explains the decision, keeps the scope narrow, and includes proof that the change was checked.
+
+| Pull request section | What to include |
 |---|---|
-| A documented technology choice | Gives contributors one supported way to run the project. |
-| Dependency manifest and lockfile | Makes installations repeatable across contributors and automation. |
-| Development, build, and test commands | Gives reviewers a consistent way to validate changes. |
-| Ignore rules and example environment file | Prevents local artifacts and secrets from being committed. |
-| Basic automated checks | Catches common problems before a pull request is merged. |
+| **Title** | The same concise, imperative intent as the primary commit, such as `docs: add Road-Martt contributor guide`. |
+| **Summary** | A short paragraph describing what changed and why it matters to Road-Martt. |
+| **Validation** | Exact commands run, their results, and any manual storefront checks performed. |
+| **Risk and rollout** | Note Shopify data impact, configuration changes, feature flags, or rollback steps when applicable. |
+| **Visual evidence** | Before-and-after screenshots for customer-facing layout or styling changes. |
+| **Follow-up** | Explicitly list deliberately deferred work rather than hiding it in scope. |
 
-## Keeping This Guide Accurate
+Do not merge your own pull request until required checks and reviews are complete. Rebase or update the branch when `main` changes materially, resolve conflicts locally, repeat validation, and push the updated branch. Keep conversations constructive and resolve review comments with either the requested change or a clear technical rationale.
 
-This document is deliberately transparent about the repository’s initial state. Once source code and tooling are added, replace the status note and add verified commands rather than leaving placeholders. New contributors should be able to follow the README and this guide from a clean clone without needing private instructions.
+## Shopify and Security Boundaries
+
+Road-Martt’s commerce backend should remain Shopify-backed. Do not duplicate checkout, payment, fulfillment, inventory, or customer-review systems in the repository. When working on Shopify integrations, request only the minimum necessary access, keep tokens server-side, and use environment variables or the platform’s managed secret settings. Never create fake customer reviews, ratings, or testimonials in code, fixtures, copy, or sample data.
+
+## Keeping Documentation Current
+
+Whenever a contribution adds a language runtime, package manager, framework, test suite, deployment process, environment variable, or Shopify integration, update `README.md` and this file in the same pull request. A new contributor should be able to start from a clean clone without relying on unpublished instructions.
 
 ## References
 
-[1]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository "GitHub Docs: Cloning a repository"
-[2]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-permissions-and-visibility-of-forks "GitHub Docs: About permissions and visibility of forks"
-[3]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests "GitHub Docs: About pull requests"
+[1]: https://docs.github.com/en/code-security/secret-scanning/introduction/about-secret-scanning "GitHub Docs: About secret scanning"
+[2]: https://cli.github.com/manual/gh_auth_login "GitHub CLI Manual: gh auth login"
+[3]: https://cli.github.com/manual/gh_auth_setup-git "GitHub CLI Manual: gh auth setup-git"
+[4]: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens "GitHub Docs: Managing personal access tokens"
+[5]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/about-permissions-and-visibility-of-forks "GitHub Docs: About permissions and visibility of forks"
+[6]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests "GitHub Docs: About pull requests"
